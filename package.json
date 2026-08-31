@@ -1,0 +1,119 @@
+{
+  "name": "bnd-tools",
+  "displayName": "Bnd Support",
+  "description": "Minimal bnd/Bndtools workflow support for IBM Bob (build, resolve, run .bndrun files)",
+  "version": "0.0.2",
+  "publisher": "fezzyBug",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Programming Languages", "Other"],
+  "activationEvents": [
+    "workspaceContains:**/cnf/build.bnd",
+    "onLanguage:bnd"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "bnd",
+        "aliases": ["Bnd", "bnd"],
+        "extensions": [".bnd", ".bndrun"],
+        "filenames": ["bnd.bnd", "build.bnd"],
+        "configuration": "./language-configuration/bnd.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bnd",
+        "scopeName": "source.bnd",
+        "path": "./syntaxes/bnd.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "bnd.buildWorkspace",
+        "title": "Bnd: Build Workspace",
+        "category": "Bnd"
+      },
+      {
+        "command": "bnd.buildProject",
+        "title": "Bnd: Build Project",
+        "category": "Bnd"
+      },
+      {
+        "command": "bnd.clean",
+        "title": "Bnd: Clean",
+        "category": "Bnd"
+      },
+      {
+        "command": "bnd.resolveBndrun",
+        "title": "Bnd: Resolve",
+        "category": "Bnd"
+      },
+      {
+        "command": "bnd.runBndrun",
+        "title": "Bnd: Run",
+        "category": "Bnd"
+      },
+      {
+        "command": "bnd.showProjectInfo",
+        "title": "Bnd: Show Project Information",
+        "category": "Bnd"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "bnd.runBndrun",
+          "when": "resourceExtname == .bndrun",
+          "group": "navigation"
+        },
+        {
+          "command": "bnd.resolveBndrun",
+          "when": "resourceExtname == .bndrun",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "bnd.buildProject",
+          "when": "resourceFilename == bnd.bnd",
+          "group": "bnd"
+        },
+        {
+          "command": "bnd.resolveBndrun",
+          "when": "resourceExtname == .bndrun",
+          "group": "bnd"
+        },
+        {
+          "command": "bnd.runBndrun",
+          "when": "resourceExtname == .bndrun",
+          "group": "bnd"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Bnd Tools",
+      "properties": {
+        "bnd.cliPath": {
+          "type": "string",
+          "default": "bnd",
+          "description": "Path to the bnd CLI executable. Defaults to 'bnd' on PATH."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0",
+    "@vscode/vsce": "^2.24.0"
+  }
+}

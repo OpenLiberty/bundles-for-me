@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "bnd",
+  "scopeName": "source.bnd",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#instruction-key" },
+    { "include": "#macro" },
+    { "include": "#continuation" }
+  ],
+  "repository": {
+    "comment": {
+      "match": "^\\s*#.*$",
+      "name": "comment.line.number-sign.bnd"
+    },
+    "instruction-key": {
+      "match": "^([-A-Za-z0-9_.]+)\\s*(:?=|:)",
+      "captures": {
+        "1": { "name": "keyword.other.instruction.bnd" },
+        "2": { "name": "keyword.operator.assignment.bnd" }
+      }
+    },
+    "macro": {
+      "match": "\\$\\{[^}]*\\}",
+      "name": "variable.parameter.macro.bnd"
+    },
+    "continuation": {
+      "match": "\\\\\\s*$",
+      "name": "constant.character.escape.line-continuation.bnd"
+    }
+  }
+}

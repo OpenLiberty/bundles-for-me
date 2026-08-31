@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Generated extension artifacts
+out/
+*.vsix
+
+# Local tooling and operating-system files
+.vscode-test/
+.DS_Store
+*.log
