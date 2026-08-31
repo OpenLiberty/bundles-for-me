@@ -5,6 +5,7 @@ import { runBndCommand } from './bndCli';
 import { findWorkspaceRoot, findProjectRoot } from './workspaceDetection';
 
 let outputChannel: vscode.OutputChannel;
+const bndFileBadgeColor = new vscode.ThemeColor('bndTools.fileBadgeForeground');
 
 export function activate(context: vscode.ExtensionContext): void {
     outputChannel = vscode.window.createOutputChannel('Bnd');
@@ -24,6 +25,10 @@ export function activate(context: vscode.ExtensionContext): void {
             { language: 'bnd', pattern: '**/*.bndrun' },
             new BndrunCodeLensProvider()
         )
+    );
+
+    context.subscriptions.push(
+        vscode.window.registerFileDecorationProvider(new BndFileDecorationProvider())
     );
 }
 
@@ -171,5 +176,25 @@ class BndrunCodeLensProvider implements vscode.CodeLensProvider {
         });
 
         return [runLens, resolveLens];
+    }
+}
+
+/**
+ * Marks Bnd descriptors and runtime definitions without replacing the active
+ * file-icon theme selected by the user.
+ */
+class BndFileDecorationProvider implements vscode.FileDecorationProvider {
+    provideFileDecoration(uri: vscode.Uri): vscode.FileDecoration | undefined {
+        const extension = path.extname(uri.fsPath).toLowerCase();
+
+        if (extension === '.bndrun') {
+            return new vscode.FileDecoration('⧉', 'Bnd runtime definition', bndFileBadgeColor);
+        }
+
+        if (extension === '.bnd') {
+            return new vscode.FileDecoration('⧉', 'Bnd descriptor', bndFileBadgeColor);
+        }
+
+        return undefined;
     }
 }

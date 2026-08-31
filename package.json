@@ -2,17 +2,21 @@
   "name": "bnd-tools",
   "displayName": "Bnd Support",
   "description": "Minimal bnd/Bndtools workflow support for IBM Bob (build, resolve, run .bndrun files)",
-  "version": "0.0.2",
+  "version": "0.0.8",
   "publisher": "fezzyBug",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": ["Programming Languages", "Other"],
   "activationEvents": [
+    "onStartupFinished",
     "workspaceContains:**/cnf/build.bnd",
+    "workspaceContains:**/*.bnd",
+    "workspaceContains:**/*.bndrun",
     "onLanguage:bnd"
   ],
   "main": "./out/extension.js",
+  "icon": "./icons/bnd_bundles.png",
   "contributes": {
     "languages": [
       {
@@ -28,6 +32,16 @@
         "language": "bnd",
         "scopeName": "source.bnd",
         "path": "./syntaxes/bnd.tmLanguage.json"
+      }
+    ],
+    "colors": [
+      {
+        "id": "bndTools.fileBadgeForeground",
+        "description": "Foreground color for Bnd file badges.",
+        "defaults": {
+          "light": "#B54708",
+          "dark": "#F79009"
+        }
       }
     ],
     "commands": [
