@@ -2,7 +2,7 @@
   "name": "bnd-tools",
   "displayName": "Bnd Support",
   "description": "Minimal bnd/Bndtools workflow support for IBM Bob (build, resolve, run .bndrun files)",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "publisher": "fezzyBug",
   "engines": {
     "vscode": "^1.85.0"
