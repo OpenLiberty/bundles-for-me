@@ -2,7 +2,7 @@
   "name": "bnd-tools",
   "displayName": "Bnd Support",
   "description": "Minimal bnd/Bndtools workflow support for IBM Bob (build, resolve, run .bndrun files)",
-  "version": "0.0.12",
+  "version": "0.1.0",
   "publisher": "fezzyBug",
   "engines": {
     "vscode": "^1.85.0"
@@ -68,6 +68,12 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "bnd.showBundleGraph",
+        "title": "Bnd: Show Bundle Graph",
+        "category": "Bnd",
+        "icon": "$(type-hierarchy-sub)"
+      },
+      {
         "command": "bnd.buildWorkspace",
         "title": "Bnd: Build Workspace",
         "category": "Bnd"
@@ -128,14 +134,19 @@
           "group": "bnd@4"
         },
         {
+          "command": "bnd.showBundleGraph",
+          "when": "view == bnd.hub && viewItem == bndDescriptor",
+          "group": "bnd@5"
+        },
+        {
           "command": "bnd.resolveBndrun",
           "when": "view == bnd.hub && viewItem == bndRuntime",
-          "group": "bnd@5"
+          "group": "bnd@6"
         },
         {
           "command": "bnd.runBndrun",
           "when": "view == bnd.hub && viewItem == bndRuntime",
-          "group": "bnd@6"
+          "group": "bnd@7"
         }
       ],
       "editor/title": [
@@ -172,14 +183,19 @@
           "group": "bnd@4"
         },
         {
+          "command": "bnd.showBundleGraph",
+          "when": "resourceFilename == bnd.bnd",
+          "group": "bnd@5"
+        },
+        {
           "command": "bnd.resolveBndrun",
           "when": "resourceExtname == .bndrun",
-          "group": "bnd@5"
+          "group": "bnd@6"
         },
         {
           "command": "bnd.runBndrun",
           "when": "resourceExtname == .bndrun",
-          "group": "bnd@6"
+          "group": "bnd@7"
         }
       ]
     },

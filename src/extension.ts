@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { runBndCommand } from './bndCli';
 import { BndHubProvider } from './bndHub';
+import { showBundleGraph } from './bundleGraph';
 import { findWorkspaceRoot, findProjectRoot } from './workspaceDetection';
 
 let outputChannel: vscode.OutputChannel;
@@ -19,7 +20,8 @@ export function activate(context: vscode.ExtensionContext): void {
         vscode.commands.registerCommand('bnd.clean', (target?: CommandTarget) => cleanWorkspace(target)),
         vscode.commands.registerCommand('bnd.resolveBndrun', (target?: CommandTarget) => resolveBndrun(target)),
         vscode.commands.registerCommand('bnd.runBndrun', (target?: CommandTarget) => runBndrun(target)),
-        vscode.commands.registerCommand('bnd.showProjectInfo', (target?: CommandTarget) => showProjectInfo(target))
+        vscode.commands.registerCommand('bnd.showProjectInfo', (target?: CommandTarget) => showProjectInfo(target)),
+        vscode.commands.registerCommand('bnd.showBundleGraph', (target?: CommandTarget) => showBundleGraph(commandTargetUri(target)))
     );
 
     context.subscriptions.push(
