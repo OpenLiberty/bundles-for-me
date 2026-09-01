@@ -2,22 +2,24 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { runBndCommand } from './bndCli';
+import { BndHubProvider } from './bndHub';
 import { findWorkspaceRoot, findProjectRoot } from './workspaceDetection';
 
 let outputChannel: vscode.OutputChannel;
 const bndFileBadgeColor = new vscode.ThemeColor('bndTools.fileBadgeForeground');
+type CommandTarget = vscode.Uri | { resourceUri?: vscode.Uri };
 
 export function activate(context: vscode.ExtensionContext): void {
     outputChannel = vscode.window.createOutputChannel('Bnd');
     context.subscriptions.push(outputChannel);
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('bnd.buildWorkspace', () => buildWorkspace()),
-        vscode.commands.registerCommand('bnd.buildProject', (uri?: vscode.Uri) => buildProject(uri)),
-        vscode.commands.registerCommand('bnd.clean', () => cleanWorkspace()),
-        vscode.commands.registerCommand('bnd.resolveBndrun', (uri?: vscode.Uri) => resolveBndrun(uri)),
-        vscode.commands.registerCommand('bnd.runBndrun', (uri?: vscode.Uri) => runBndrun(uri)),
-        vscode.commands.registerCommand('bnd.showProjectInfo', (uri?: vscode.Uri) => showProjectInfo(uri))
+        vscode.commands.registerCommand('bnd.buildWorkspace', (target?: CommandTarget) => buildWorkspace(target)),
+        vscode.commands.registerCommand('bnd.buildProject', (target?: CommandTarget) => buildProject(target)),
+        vscode.commands.registerCommand('bnd.clean', (target?: CommandTarget) => cleanWorkspace(target)),
+        vscode.commands.registerCommand('bnd.resolveBndrun', (target?: CommandTarget) => resolveBndrun(target)),
+        vscode.commands.registerCommand('bnd.runBndrun', (target?: CommandTarget) => runBndrun(target)),
+        vscode.commands.registerCommand('bnd.showProjectInfo', (target?: CommandTarget) => showProjectInfo(target))
     );
 
     context.subscriptions.push(
@@ -29,6 +31,13 @@ export function activate(context: vscode.ExtensionContext): void {
 
     context.subscriptions.push(
         vscode.window.registerFileDecorationProvider(new BndFileDecorationProvider())
+    );
+
+    const bndHubProvider = new BndHubProvider();
+    context.subscriptions.push(
+        bndHubProvider,
+        vscode.window.registerTreeDataProvider('bnd.hub', bndHubProvider),
+        vscode.commands.registerCommand('bnd.refreshHub', () => bndHubProvider.refresh())
     );
 }
 
@@ -60,14 +69,19 @@ async function resolveTargetUri(uri?: vscode.Uri, requiredExtension?: string): P
     return undefined;
 }
 
-async function buildWorkspace(): Promise<void> {
-    const folder = vscode.workspace.workspaceFolders?.[0];
+function commandTargetUri(target?: CommandTarget): vscode.Uri | undefined {
+    return target instanceof vscode.Uri ? target : target?.resourceUri;
+}
+
+async function buildWorkspace(target?: CommandTarget): Promise<void> {
+    const targetUri = commandTargetUri(target);
+    const folder = targetUri ?? vscode.workspace.workspaceFolders?.[0]?.uri;
     if (!folder) {
         vscode.window.showErrorMessage('Open a folder containing a bnd workspace first.');
         return;
     }
 
-    const workspaceRoot = await findWorkspaceRoot(folder.uri.fsPath);
+    const workspaceRoot = await findWorkspaceRoot(folder.fsPath);
     if (!workspaceRoot) {
         vscode.window.showErrorMessage('No bnd workspace (cnf/build.bnd) found in this folder.');
         return;
@@ -76,13 +90,13 @@ async function buildWorkspace(): Promise<void> {
     await runBndCommand(['build'], workspaceRoot, outputChannel, 'Building workspace');
 }
 
-async function buildProject(uri?: vscode.Uri): Promise<void> {
-    const target = await resolveTargetUri(uri);
-    if (!target) {
+async function buildProject(target?: CommandTarget): Promise<void> {
+    const uri = await resolveTargetUri(commandTargetUri(target));
+    if (!uri) {
         return;
     }
 
-    const projectRoot = await findProjectRoot(target.fsPath);
+    const projectRoot = await findProjectRoot(uri.fsPath);
     if (!projectRoot) {
         vscode.window.showErrorMessage('Could not find a bnd.bnd file for this project.');
         return;
@@ -91,14 +105,15 @@ async function buildProject(uri?: vscode.Uri): Promise<void> {
     await runBndCommand(['build'], projectRoot, outputChannel, 'Building project');
 }
 
-async function cleanWorkspace(): Promise<void> {
-    const folder = vscode.workspace.workspaceFolders?.[0];
+async function cleanWorkspace(target?: CommandTarget): Promise<void> {
+    const targetUri = commandTargetUri(target);
+    const folder = targetUri ?? vscode.workspace.workspaceFolders?.[0]?.uri;
     if (!folder) {
         vscode.window.showErrorMessage('Open a folder containing a bnd workspace first.');
         return;
     }
 
-    const workspaceRoot = await findWorkspaceRoot(folder.uri.fsPath);
+    const workspaceRoot = await findWorkspaceRoot(folder.fsPath);
     if (!workspaceRoot) {
         vscode.window.showErrorMessage('No bnd workspace (cnf/build.bnd) found in this folder.');
         return;
@@ -107,43 +122,43 @@ async function cleanWorkspace(): Promise<void> {
     await runBndCommand(['clean'], workspaceRoot, outputChannel, 'Cleaning workspace');
 }
 
-async function resolveBndrun(uri?: vscode.Uri): Promise<void> {
-    const target = await resolveTargetUri(uri, '.bndrun');
-    if (!target) {
+async function resolveBndrun(target?: CommandTarget): Promise<void> {
+    const uri = await resolveTargetUri(commandTargetUri(target), '.bndrun');
+    if (!uri) {
         return;
     }
 
-    const cwd = path.dirname(target.fsPath);
+    const cwd = path.dirname(uri.fsPath);
     await runBndCommand(
-        ['resolve', 'resolve', '-W', target.fsPath],
+        ['resolve', 'resolve', '-W', uri.fsPath],
         cwd,
         outputChannel,
-        `Resolving ${path.basename(target.fsPath)}`
+        `Resolving ${path.basename(uri.fsPath)}`
     );
 }
 
-async function runBndrun(uri?: vscode.Uri): Promise<void> {
-    const target = await resolveTargetUri(uri, '.bndrun');
-    if (!target) {
+async function runBndrun(target?: CommandTarget): Promise<void> {
+    const uri = await resolveTargetUri(commandTargetUri(target), '.bndrun');
+    if (!uri) {
         return;
     }
 
-    const cwd = path.dirname(target.fsPath);
+    const cwd = path.dirname(uri.fsPath);
     await runBndCommand(
-        ['run', target.fsPath],
+        ['run', uri.fsPath],
         cwd,
         outputChannel,
-        `Running ${path.basename(target.fsPath)}`
+        `Running ${path.basename(uri.fsPath)}`
     );
 }
 
-async function showProjectInfo(uri?: vscode.Uri): Promise<void> {
-    const target = await resolveTargetUri(uri);
-    if (!target) {
+async function showProjectInfo(target?: CommandTarget): Promise<void> {
+    const uri = await resolveTargetUri(commandTargetUri(target));
+    if (!uri) {
         return;
     }
 
-    const projectRoot = await findProjectRoot(target.fsPath);
+    const projectRoot = await findProjectRoot(uri.fsPath);
     if (!projectRoot) {
         vscode.window.showErrorMessage('Could not find a bnd.bnd file for this project.');
         return;

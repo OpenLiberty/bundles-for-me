@@ -9,6 +9,7 @@ for the existing `bnd` command-line tool.
 - Recognizes bnd workspaces and projects
 - Adds syntax highlighting for `.bnd` and `.bndrun` files
 - Adds a bundle badge to `.bnd` descriptors and `.bndrun` runtime files
+- Adds a Bnd Hub Activity Bar view that groups descriptors by their package paths
 - Builds workspaces and projects
 - Resolves and runs `.bndrun` files
 - Shows bnd command output in the `Bnd` output channel

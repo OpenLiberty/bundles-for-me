@@ -2,7 +2,7 @@
   "name": "bnd-tools",
   "displayName": "Bnd Support",
   "description": "Minimal bnd/Bndtools workflow support for IBM Bob (build, resolve, run .bndrun files)",
-  "version": "0.0.8",
+  "version": "0.0.11",
   "publisher": "fezzyBug",
   "engines": {
     "vscode": "^1.85.0"
@@ -44,7 +44,29 @@
         }
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "bnd",
+          "title": "Bnd",
+          "icon": "./icons/bnd_bundles.png"
+        }
+      ]
+    },
+    "views": {
+      "bnd": [
+        {
+          "id": "bnd.hub",
+          "name": "Bnd Hub"
+        }
+      ]
+    },
     "commands": [
+      {
+        "command": "bnd.refreshHub",
+        "title": "Bnd: Refresh Hub",
+        "icon": "$(refresh)"
+      },
       {
         "command": "bnd.buildWorkspace",
         "title": "Bnd: Build Workspace",
@@ -77,6 +99,45 @@
       }
     ],
     "menus": {
+      "view/title": [
+        {
+          "command": "bnd.refreshHub",
+          "when": "view == bnd.hub",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "bnd.buildWorkspace",
+          "when": "view == bnd.hub && viewItem =~ /bnd(Descriptor|Runtime)/",
+          "group": "bnd@1"
+        },
+        {
+          "command": "bnd.buildProject",
+          "when": "view == bnd.hub && viewItem =~ /bnd(Descriptor|Runtime)/",
+          "group": "bnd@2"
+        },
+        {
+          "command": "bnd.clean",
+          "when": "view == bnd.hub && viewItem =~ /bnd(Descriptor|Runtime)/",
+          "group": "bnd@3"
+        },
+        {
+          "command": "bnd.showProjectInfo",
+          "when": "view == bnd.hub && viewItem =~ /bnd(Descriptor|Runtime)/",
+          "group": "bnd@4"
+        },
+        {
+          "command": "bnd.resolveBndrun",
+          "when": "view == bnd.hub && viewItem == bndRuntime",
+          "group": "bnd@5"
+        },
+        {
+          "command": "bnd.runBndrun",
+          "when": "view == bnd.hub && viewItem == bndRuntime",
+          "group": "bnd@6"
+        }
+      ],
       "editor/title": [
         {
           "command": "bnd.runBndrun",
@@ -91,19 +152,34 @@
       ],
       "explorer/context": [
         {
+          "command": "bnd.buildWorkspace",
+          "when": "resourceExtname == .bnd || resourceExtname == .bndrun",
+          "group": "bnd@1"
+        },
+        {
           "command": "bnd.buildProject",
-          "when": "resourceFilename == bnd.bnd",
-          "group": "bnd"
+          "when": "resourceExtname == .bnd || resourceExtname == .bndrun",
+          "group": "bnd@2"
+        },
+        {
+          "command": "bnd.clean",
+          "when": "resourceExtname == .bnd || resourceExtname == .bndrun",
+          "group": "bnd@3"
+        },
+        {
+          "command": "bnd.showProjectInfo",
+          "when": "resourceExtname == .bnd || resourceExtname == .bndrun",
+          "group": "bnd@4"
         },
         {
           "command": "bnd.resolveBndrun",
           "when": "resourceExtname == .bndrun",
-          "group": "bnd"
+          "group": "bnd@5"
         },
         {
           "command": "bnd.runBndrun",
           "when": "resourceExtname == .bndrun",
-          "group": "bnd"
+          "group": "bnd@6"
         }
       ]
     },
