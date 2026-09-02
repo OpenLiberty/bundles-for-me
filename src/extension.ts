@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import { runBndCommand } from './bndCli';
 import { BndHubProvider } from './bndHub';
 import { showBundleGraph } from './bundleGraph';
+import { BndLanguageSupport } from './bndLanguage';
 import { findWorkspaceRoot, findProjectRoot } from './workspaceDetection';
 
 let outputChannel: vscode.OutputChannel;
@@ -36,8 +37,10 @@ export function activate(context: vscode.ExtensionContext): void {
     );
 
     const bndHubProvider = new BndHubProvider();
+    const bndLanguageSupport = new BndLanguageSupport();
     context.subscriptions.push(
         bndHubProvider,
+        bndLanguageSupport,
         vscode.window.registerTreeDataProvider('bnd.hub', bndHubProvider),
         vscode.commands.registerCommand('bnd.refreshHub', () => bndHubProvider.refresh())
     );

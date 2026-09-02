@@ -9,3 +9,4 @@ out/
 .vscode-test/
 .DS_Store
 *.log
+scripts/tractor-demo.js
