@@ -8,7 +8,31 @@ builds without separately recorded release notes.
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-09-08
+
 ### Added
+
+- Two-way annotation context: bnd annotation directives now identify configured classes and detected source annotations, while Java annotation hovers identify the nearest bnd descriptor and related processing directive.
+- Generic support for project-specific annotations on classes explicitly named by `-dsannotations`, `-metatypeannotations`, or `-cdiannotations`, without treating them as standard OSGi annotations.
+- Deferred source indexing so annotation evidence is collected only for hovers that need it.
+- An offline, provenance-recorded tooltip corpus based on bndtools/bnd, Apache Felix, and Apache Aries, with automated coverage for workspace, Maven, nested Ant, DS, Metatype, and CDI patterns.
+- Pure tooltip-analysis helpers and regression tests for quoted or macro-contained commas, wildcard annotation imports, Java comment/string false positives, conventional source layouts, and shorthand includes.
+
+### Fixed
+
+- Local `-include` context now resolves stable `${workspace}`, `${project}`, and `${.}` paths while leaving dynamic macros explicitly unresolved.
+- Package and instruction clause analysis no longer splits on commas inside quoted ranges or nested macros.
+- Annotation inventories ignore annotation-like text in Java comments and strings and recognize known OSGi/CDI wildcard imports.
+
+## [0.1.2] - 2026-09-03
+
+### Added
+- Contextual bnd hovers for `-dsannotations`, `Private-Package`, `Export-Package`, and `Bundle-SymbolicName`, including detected DS annotations, API consumers, private-package boundary leaks, and `.bndrun` assembly references.
+- Lightweight workspace indexing of bnd descriptors, runnable definitions, and Java sources to explain configuration using local project evidence.
+- Configuration-inheritance hovers that resolve readable local `-include` files, identify local declarations, and flag macro-, JAR-, or optional includes the extension cannot resolve.
+- Instruction categories that distinguish OSGi manifest headers, bnd instructions, and workspace-specific build properties.
+- Rich hover documentation for `Bundle-Vendor`, `Bundle-Copyright`, `-include`, `Include-Resource`, `Service-Component`, `-cdiannotations`, `-dsannotations-inherit`, `-metatypeannotations`, `Require-Capability`, `Provide-Capability`, `instrument.disabled`, and `bVersion`.
+- Import-Package context that identifies potential workspace exporters without assuming external dependencies are missing.
 
 - Phase 1 editor intelligence for `.bnd` and `.bndrun` files.
 - Instruction-aware completion for common bundle, workspace, and runtime headers.
@@ -19,6 +43,7 @@ builds without separately recorded release notes.
 
 - Added inline diagnostics for malformed property lines, duplicate singleton
   instructions, and incomplete `.bndrun` launch definitions.
+- Replaced the generic "recognized key" hover fallback with an explicit explanation that unsupported properties may be workspace-defined.
 
 ## [0.1.0] - 2026-08-31
 

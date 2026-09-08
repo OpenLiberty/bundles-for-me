@@ -1,0 +1,11 @@
+Import-Package: \
+ jakarta.servlet;version="[5, 7)";resolution:=optional, \
+ jakarta.servlet.http;version="[5, 7)";resolution:=optional, \
+ *
+
+Require-Capability: osgi.implementation; \
+ filter:="(&(osgi.implementation=osgi.http)(version>=2.0.0)(!(version>=3.0.0)))"; \
+ resolution:=optional
+
+-dsannotations: *
+-metatypeannotations: *

@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "projects": [
+    {
+      "id": "bndtools-workspace",
+      "upstream": "https://github.com/bndtools/bnd",
+      "revision": "91be96ba6b2d71792ce3a78b387f1c95ca8d90e3",
+      "sourcePaths": [
+        "org.bndtools.headless.build.manager/bnd.bnd",
+        "bndtools.test/bndws/test.dsannotations/bnd.bnd",
+        "biz.aQute.repository/bnd.bnd"
+      ],
+      "descriptor": "module/bnd.bnd",
+      "expected": {
+        "propertyKeys": ["-include", "-dsannotations", "-metatypeannotations", "private-package"],
+        "annotationFamilies": { "Declarative Services": 2, "OSGi Metatype": 2 },
+        "localIncludes": 2
+      }
+    },
+    {
+      "id": "apache-felix-maven",
+      "upstream": "https://github.com/apache/felix-dev",
+      "revision": "534c4ae56aa7bc8fba857d85c0deb272b6d6ddc3",
+      "sourcePaths": [
+        "scr/bnd.bnd",
+        "healthcheck/core/src/main/java"
+      ],
+      "descriptor": "module/bnd.bnd",
+      "expected": {
+        "propertyKeys": ["import-package", "require-capability"],
+        "packages": ["jakarta.servlet", "jakarta.servlet.http", "*"],
+        "annotationFamilies": { "Declarative Services": 2, "OSGi Metatype": 1 }
+      }
+    },
+    {
+      "id": "apache-felix-nested-ant",
+      "upstream": "https://github.com/apache/felix-dev",
+      "revision": "534c4ae56aa7bc8fba857d85c0deb272b6d6ddc3",
+      "sourcePaths": [
+        "ipojo/runtime/distributions/ten-minutes-tutorial/src/main/solution/spell.english/spell.english.bnd"
+      ],
+      "descriptor": "tutorial/spell.english/spell.english.bnd",
+      "expected": {
+        "propertyKeys": ["private-package"],
+        "localSourceFiles": 1
+      }
+    },
+    {
+      "id": "apache-aries-maven-cdi",
+      "upstream": "https://github.com/apache/aries",
+      "revision": "3054048c1767c88ebc4173863e9abe0f89b31831",
+      "sourcePaths": [
+        "pushstream/pushstream/bnd.bnd",
+        "blueprint-maven-plugin/blueprint-maven-plugin/src/main/java"
+      ],
+      "descriptor": "module/bnd.bnd",
+      "expected": {
+        "propertyKeys": ["export-package", "-cdiannotations"],
+        "annotationFamilies": { "CDI": 1 }
+      }
+    }
+  ]
+}

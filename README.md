@@ -44,3 +44,18 @@ npm run package
 ```
 
 The package command creates an installable `.vsix` file in the project root.
+
+## Tooltip corpus tests
+
+Run the offline tooltip-analysis corpus with:
+
+```bash
+npm test
+```
+
+The suite covers reduced, provenance-recorded patterns from bndtools/bnd,
+Apache Felix, and Apache Aries. It exercises bnd workspace, Maven, and nested
+Ant layouts; DS, Metatype, and CDI annotations; local include macros; and
+comma-sensitive bnd clauses. See `test/fixtures/corpus/README.md` when adding or
+refreshing a fixture. Upstream repositories are research inputs only and are
+never cloned by the test command.

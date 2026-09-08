@@ -2,7 +2,7 @@
   "name": "bnd-tools",
   "displayName": "Bnd Support",
   "description": "Minimal bnd/Bndtools workflow support for IBM Bob (build, resolve, run .bndrun files)",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "publisher": "fezzyBug",
   "engines": {
     "vscode": "^1.85.0"
@@ -213,6 +213,7 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
+    "test": "npm run compile && node --test test/*.test.js",
     "watch": "tsc -watch -p ./",
     "package": "vsce package"
   },

@@ -1,0 +1,4 @@
+-include: ${workspace}/cnf/includes/jdt.bnd, ${workspace}/cnf/includes/bndtools.bnd
+-dsannotations: *
+-metatypeannotations: *
+Private-Package: example.internal

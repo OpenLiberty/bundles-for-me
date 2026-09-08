@@ -1,0 +1,2 @@
+Export-Package: ${packages;VERSIONED}
+-cdiannotations: org.apache.aries.example.Factory

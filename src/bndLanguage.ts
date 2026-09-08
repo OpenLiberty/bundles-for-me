@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { allBndInstructions, BndInstructionDefinition, findBndInstruction } from './bndMetadata';
+import { BndWorkspaceContext } from './bndWorkspaceContext';
 
 interface ParsedInstruction {
     readonly key: string;
@@ -9,7 +10,7 @@ interface ParsedInstruction {
     readonly keyRange: vscode.Range;
     readonly fullRange: vscode.Range;
     readonly valueRange: vscode.Range;
-    readonly operator: ':' | '=';
+    readonly operator: ':' | '=' | ' ';
 }
 
 interface ParseResult {
@@ -18,17 +19,21 @@ interface ParseResult {
 }
 
 const HEADER_PATTERN = /^\s*([-A-Za-z0-9_.]+)\s*(:|=)\s*(.*)$/;
+const SHORTHAND_INCLUDE_PATTERN = /^\s*(-include)\s+(.+)$/i;
 const CONTINUATION_PATTERN = /^\s+/;
 
 export class BndLanguageSupport implements vscode.Disposable {
     private readonly diagnostics = vscode.languages.createDiagnosticCollection('bnd');
     private readonly subscriptions: vscode.Disposable[] = [];
+    private readonly workspaceContext = new BndWorkspaceContext();
 
     constructor() {
         this.subscriptions.push(
             this.diagnostics,
+            this.workspaceContext,
             vscode.languages.registerCompletionItemProvider({ language: 'bnd' }, new BndCompletionProvider()),
-            vscode.languages.registerHoverProvider({ language: 'bnd' }, new BndHoverProvider()),
+            vscode.languages.registerHoverProvider({ language: 'bnd' }, new BndHoverProvider(this.workspaceContext)),
+            vscode.languages.registerHoverProvider({ language: 'java' }, new BndAnnotationHoverProvider(this.workspaceContext)),
             vscode.workspace.onDidOpenTextDocument((document) => this.refreshDocument(document)),
             vscode.workspace.onDidChangeTextDocument((event) => this.refreshDocument(event.document)),
             vscode.workspace.onDidCloseTextDocument((document) => this.diagnostics.delete(document.uri))
@@ -69,7 +74,9 @@ class BndCompletionProvider implements vscode.CompletionItemProvider {
 }
 
 class BndHoverProvider implements vscode.HoverProvider {
-    provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.Hover | undefined {
+    constructor(private readonly workspaceContext: BndWorkspaceContext) {}
+
+    async provideHover(document: vscode.TextDocument, position: vscode.Position): Promise<vscode.Hover | undefined> {
         const parsed = parseBndDocument(document);
         const instruction = parsed.instructions.find((entry) => entry.keyRange.contains(position));
         if (!instruction) {
@@ -80,12 +87,12 @@ class BndHoverProvider implements vscode.HoverProvider {
         const markdown = new vscode.MarkdownString(undefined, true);
         markdown.appendMarkdown(`**${instruction.key}**\n\n`);
         if (definition) {
-            markdown.appendMarkdown(`${definition.summary}\n\n${definition.detail}`);
+            markdown.appendMarkdown(`*${definition.category}*\n\n${definition.summary}\n\n${definition.detail}`);
             if (definition.example) {
                 markdown.appendCodeblock(definition.example, 'bnd');
             }
         } else {
-            markdown.appendMarkdown('Recognized as a bnd instruction key. Detailed help is not available in this slice yet.');
+            markdown.appendMarkdown('This appears to be a workspace-defined property or an instruction the extension does not yet model. Its meaning comes from this workspace’s included configuration and build tooling, not from a safe generic assumption.');
         }
 
         if (instruction.value.trim()) {
@@ -93,7 +100,33 @@ class BndHoverProvider implements vscode.HoverProvider {
             markdown.appendCodeblock(instruction.value, 'bnd');
         }
 
+        const context = await this.workspaceContext.describe(document, instruction.key, instruction.value);
+        if (context) {
+            markdown.appendMarkdown(`\n\n---\n\n**${context.heading}**\n\n${context.lines.join('\n\n')}`);
+        }
+
         return new vscode.Hover(markdown, instruction.keyRange);
+    }
+}
+
+class BndAnnotationHoverProvider implements vscode.HoverProvider {
+    constructor(private readonly workspaceContext: BndWorkspaceContext) {}
+
+    async provideHover(document: vscode.TextDocument, position: vscode.Position): Promise<vscode.Hover | undefined> {
+        const wordRange = document.getWordRangeAtPosition(position, /[A-Za-z_]\w*(?:\.\w+)*/);
+        if (!wordRange || wordRange.start.character === 0 || document.getText(new vscode.Range(wordRange.start.translate(0, -1), wordRange.start)) !== '@') {
+            return undefined;
+        }
+
+        const annotationName = document.getText(wordRange);
+        const context = await this.workspaceContext.describeAnnotation(document, annotationName);
+        if (!context) {
+            return undefined;
+        }
+
+        const markdown = new vscode.MarkdownString(undefined, true);
+        markdown.appendMarkdown(`**@${annotationName}**\n\n---\n\n**${context.heading}**\n\n${context.lines.join('\n\n')}`);
+        return new vscode.Hover(markdown, wordRange);
     }
 }
 
@@ -132,10 +165,11 @@ export function parseBndDocument(document: vscode.TextDocument): ParseResult {
         }
 
         const headerMatch = text.match(HEADER_PATTERN);
-        if (headerMatch) {
-            const key = headerMatch[1];
-            const operator = headerMatch[2] as ':' | '=';
-            const value = headerMatch[3];
+        const shorthandIncludeMatch = headerMatch ? undefined : text.match(SHORTHAND_INCLUDE_PATTERN);
+        if (headerMatch || shorthandIncludeMatch) {
+            const key = (headerMatch ?? shorthandIncludeMatch)![1];
+            const operator = headerMatch ? headerMatch[2] as ':' | '=' : ' ';
+            const value = headerMatch ? headerMatch[3] : shorthandIncludeMatch![2];
             const keyStart = text.indexOf(key);
             const keyRange = new vscode.Range(lineIndex, keyStart, lineIndex, keyStart + key.length);
             const valueStart = text.indexOf(value, keyStart + key.length + 1);
