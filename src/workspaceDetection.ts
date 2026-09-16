@@ -1,12 +1,22 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
+function startDirectory(startPath: string): string | undefined {
+    if (!fs.existsSync(startPath)) {
+        return undefined;
+    }
+    return fs.statSync(startPath).isDirectory() ? startPath : path.dirname(startPath);
+}
+
 /**
  * A bnd workspace is identified by the presence of cnf/build.bnd.
  * Walks upward from startPath looking for that marker.
  */
 export async function findWorkspaceRoot(startPath: string): Promise<string | undefined> {
-    let current = fs.statSync(startPath).isDirectory() ? startPath : path.dirname(startPath);
+    let current = startDirectory(startPath);
+    if (!current) {
+        return undefined;
+    }
 
     while (true) {
         const marker = path.join(current, 'cnf', 'build.bnd');
@@ -30,7 +40,12 @@ export async function findWorkspaceRoot(startPath: string): Promise<string | und
  * (a project should not live above its own bnd.bnd).
  */
 export async function findProjectRoot(startPath: string): Promise<string | undefined> {
-    let current = fs.statSync(startPath).isDirectory() ? startPath : path.dirname(startPath);
+    let current = startDirectory(startPath);
+    if (!current) {
+        return undefined;
+    }
+
+    const workspaceRoot = await findWorkspaceRoot(startPath);
 
     while (true) {
         const marker = path.join(current, 'bnd.bnd');
@@ -40,6 +55,9 @@ export async function findProjectRoot(startPath: string): Promise<string | undef
 
         const parent = path.dirname(current);
         if (parent === current) {
+            return undefined;
+        }
+        if (workspaceRoot && current === workspaceRoot) {
             return undefined;
         }
         current = parent;
