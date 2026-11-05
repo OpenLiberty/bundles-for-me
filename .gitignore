@@ -10,3 +10,7 @@ out/
 .DS_Store
 *.log
 scripts/tractor-demo.js
+
+# Local audit/lifecycle run output (contains machine-specific paths)
+test/fixtures/corpus/*-run-*/
+test/fixtures/corpus/*lifecycle-results.md
