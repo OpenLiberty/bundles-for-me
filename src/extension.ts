@@ -101,9 +101,18 @@ async function buildProject(target?: CommandTarget): Promise<void> {
         return;
     }
 
+    const workspaceRoot = await findWorkspaceRoot(uri.fsPath);
+    if (!workspaceRoot) {
+        vscode.window.showErrorMessage('Build Project requires a bnd workspace containing cnf/build.bnd. Standalone .bnd files are not buildable by this command.');
+        return;
+    }
+
     const projectRoot = await findProjectRoot(uri.fsPath);
     if (!projectRoot) {
-        vscode.window.showErrorMessage('Could not find a bnd.bnd file for this project.');
+        const fileName = path.basename(uri.fsPath);
+        vscode.window.showErrorMessage(fileName.endsWith('.bnd') && fileName !== 'bnd.bnd'
+            ? 'Build Project expects a workspace project descriptor named bnd.bnd. Use bnd CLI or the project build system for standalone or differently named .bnd files.'
+            : 'Could not find a bnd.bnd file for this workspace project.');
         return;
     }
 
@@ -163,9 +172,18 @@ async function showProjectInfo(target?: CommandTarget): Promise<void> {
         return;
     }
 
+    const workspaceRoot = await findWorkspaceRoot(uri.fsPath);
+    if (!workspaceRoot) {
+        vscode.window.showErrorMessage('Project information requires a bnd workspace containing cnf/build.bnd. Standalone .bnd files are not supported by this command.');
+        return;
+    }
+
     const projectRoot = await findProjectRoot(uri.fsPath);
     if (!projectRoot) {
-        vscode.window.showErrorMessage('Could not find a bnd.bnd file for this project.');
+        const fileName = path.basename(uri.fsPath);
+        vscode.window.showErrorMessage(fileName.endsWith('.bnd') && fileName !== 'bnd.bnd'
+            ? 'Project information expects a workspace project descriptor named bnd.bnd. Use bnd CLI or the project build system for standalone or differently named .bnd files.'
+            : 'Could not find a bnd.bnd file for this workspace project.');
         return;
     }
 
